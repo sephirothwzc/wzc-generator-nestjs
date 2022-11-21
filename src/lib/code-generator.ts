@@ -1,20 +1,15 @@
 import chalk from 'chalk';
-import inquirer from 'inquirer';
 import { get, isString } from 'lodash';
 import shell from 'shelljs';
 import { Sequelize } from 'sequelize-typescript';
 import { QueryTypes } from 'sequelize';
-import { send as entitySend } from './code-template/code-entity';
-import { send as typeGraphqlSend } from './code-template/code-type-graphql';
-import { send as serviceSend } from './code-template/code-service';
-import { send as operationSend } from './code-template/code-operation';
-import { send as resolverSend } from './code-template/code-resolver';
-import { send as reactGql } from './code-template/code-react-gql';
-import { send as reactAntdList } from './code-template/code-react-antd-list';
-import { send as reactAntdItem } from './code-template/code-react-antd-item';
+import { send as modelSend } from './code-template/code-sequelize-model';
 import fs from 'fs';
 import { promisify } from 'util';
 import bluebird from 'bluebird';
+import inquirer from 'inquirer';
+
+// inquirer.registerPrompt('checkbox-plus', require('inquirer-checkbox-plus-prompt'));
 
 // #region interface
 export interface ISend {
@@ -139,89 +134,89 @@ const getConn = (config: ISequelizeConfig): Sequelize => {
  * 生成类型
  */
 const codeTypeArray = [
-  'entity',
-  'typeGraphql',
-  'operation',
-  'resolver',
-  'service',
-  'gql-react',
-  'react-antd-list',
-  'react-antd-item',
+  'sequelizeModel',
+  // 'typeGraphql',
+  // 'operation',
+  // 'resolver',
+  // 'service',
+  // 'gql-react',
+  // 'react-antd-list',
+  // 'react-antd-item',
 ];
 
 /**
  * 生成对象
  */
 const allFun = {
-  entity: {
-    fun: entitySend,
+  sequelizeModel: {
+    fun: modelSend,
     /**
      * 路径
      */
-    path: `./src/lib/model`,
+    path: `./src/lib/model/customer`,
     /**
      * 前缀
      */
-    suffix: `entity`,
+    suffix: `model`,
     /**
      * 扩展名 可以为空默认 ts
      */
     extension: 'ts',
   },
-  typeGraphql: {
-    fun: typeGraphqlSend,
-    path: (tableName: string) => {
-      const fileName = tableName.replace(/_/g, '-');
-      return `./src/graphql/${fileName}`;
-    },
-    suffix: 'gql',
-  },
-  service: {
-    fun: serviceSend,
-    path: `./src/service`,
-    suffix: 'service',
-  },
-  operation: {
-    fun: operationSend,
-    path: (tableName: string) => {
-      const fileName = tableName.replace(/_/g, '-');
-      return `./src/graphql/${fileName}`;
-    },
-    extension: 'gql',
-    fileName: 'operation',
-  },
-  resolver: {
-    fun: resolverSend,
-    path: `./src/resolver`,
-    suffix: 'resolver',
-  },
-  'gql-react': {
-    fun: reactGql,
-    path: (tableName: string) => {
-      const fileName = tableName.replace(/_/g, '-');
-      return `./src/graphql/${fileName}`;
-    },
-    extension: 'gql',
-    fileName: 'operation',
-  },
-  'react-antd-list': {
-    fun: reactAntdList,
-    path: (tableName: string) => {
-      const fileName = tableName.replace(/_/g, '-');
-      return `./src/views/${fileName}`;
-    },
-    extension: 'tsx',
-    fileName: 'list',
-  },
-  'react-antd-item': {
-    fun: reactAntdItem,
-    path: (tableName: string) => {
-      const fileName = tableName.replace(/_/g, '-');
-      return `./src/views/${fileName}`;
-    },
-    extension: 'tsx',
-    fileName: 'item',
-  },
+  // typeGraphql: {
+  //   fun: typeGraphqlSend,
+  //   path: (tableName: string) => {
+  //     const fileName = tableName.replace(/_/g, '-');
+  //     return `./src/graphql/${fileName}`;
+  //   },
+  //   suffix: 'gql',
+  // },
+  // service: {
+  //   fun: serviceSend,
+  //   path: `./src/service`,
+  //   suffix: 'service',
+  // },
+  // operation: {
+  //   fun: operationSend,
+  //   path: (tableName: string) => {
+  //     const fileName = tableName.replace(/_/g, '-');
+  //     return `./src/graphql/${fileName}`;
+  //   },
+  //   extension: 'gql',
+  //   fileName: 'operation',
+  // },
+  // resolver: {
+  //   fun: resolverSend,
+  //   path: `./src/resolver`,
+  //   suffix: 'resolver',
+  // },
+  // 'gql-react': {
+  //   fun: reactGql,
+  //   path: (tableName: string) => {
+  //     const fileName = tableName.replace(/_/g, '-');
+  //     return `./src/graphql/${fileName}`;
+  //   },
+  //   extension: 'gql',
+  //   fileName: 'operation',
+  // },
+  // 'react-antd-list': {
+  //   fun: reactAntdList,
+  //   path: (tableName: string) => {
+  //     const fileName = tableName.replace(/_/g, '-');
+  //     return `./src/views/${fileName}`;
+  //   },
+  //   extension: 'tsx',
+  //   fileName: 'list',
+  // },
+  // 'react-antd-item': {
+  //   fun: reactAntdItem,
+  //   path: (tableName: string) => {
+  //     const fileName = tableName.replace(/_/g, '-');
+  //     return `./src/views/${fileName}`;
+  //   },
+  //   extension: 'tsx',
+  //   fileName: 'item',
+  // },
 };
 
 /**
@@ -232,6 +227,7 @@ const allFun = {
 const envConfig = (env: string): ISequelizeConfig => {
   // 判断是否midway config存在
   const configPath = './database/config.json';
+  console.log(chalk.white.red.bold(`===========ENV[${env}]============`));
   try {
     const dbConfig = shell.cat(configPath);
     const result = JSON.parse(dbConfig);
@@ -256,7 +252,8 @@ const confirmDBConfig = async (database: string) => {
       default: 'Y',
     },
   ];
-  const value = await inquirer.prompt<any>(questions);
+
+  const value = await inquirer.prompt(questions);
 
   !value.dbRest && process.exit(1);
 };
@@ -373,7 +370,7 @@ const fileWritePromise = (fullPath: string, txt: string) => {
 };
 
 export const init = async (config: InitInProp) => {
-  const db = envConfig(config.configNodeEnv);
+  const db = envConfig(config.configNodeEnv || 'local');
   await confirmDBConfig(db.database);
   const tableList = await queryTable(db);
   // 选择导出表格

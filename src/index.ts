@@ -11,12 +11,12 @@ const findParam = (): InitInProp => {
   const def = process.argv.slice(2);
   if (['helper', '--h', '--helper'].includes(def[0])) {
     console.log(`
---db=<sequelize.config.name[default:development]>
+--db=<sequelize.config.name[default:local]>
 `);
     exit();
   }
   const arg = minimist(process.argv.slice(2));
-  const configNodeEnv: string = arg['db'] || 'development';
+  const configNodeEnv: string = arg['db'] || 'local';
   return { configNodeEnv };
 };
 

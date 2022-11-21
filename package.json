@@ -1,7 +1,7 @@
 {
-  "name": "code-generator-webapp",
+  "name": "wzc-generator-nestjs",
   "version": "1.0.0",
-  "description": "web生成器",
+  "description": "代码生成器",
   "main": "index.js",
   "scripts": {
     "commit": "yarn build && git add . && git-cz && git push",
@@ -17,7 +17,7 @@
     "@commitlint/config-conventional": "^13.2.0",
     "@types/bluebird": "^3.5.36",
     "@types/figlet": "^1.5.4",
-    "@types/inquirer": "^8.1.2",
+    "@types/inquirer": "^9.0.3",
     "@types/lodash": "^4.14.174",
     "@types/minimist": "^1.2.2",
     "@types/node": "^16.10.1",
@@ -36,7 +36,7 @@
     "bluebird": "^3.7.2",
     "chalk": "^4.1.2",
     "figlet": "^1.5.2",
-    "inquirer": "^8.1.5",
+    "inquirer": "^8.2.5",
     "lodash": "^4.17.21",
     "minimist": "^1.2.5",
     "mysql2": "^2.3.0",
