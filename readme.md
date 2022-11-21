@@ -40,3 +40,18 @@ $ git remote add origin git@gitlab.cyberstone.com.cn:midway-base/yongding-river.
 $ git push -u origin --all
 $ git push -u origin --tags
 ```
+## 注意
+
+- publish 之前 tsc
+
+## 使用
+
+- code
+
+```json
+{
+  "scripts":{
+    "code": "node ./node_modules/wzc-generator-nestjs/dist/index.js"
+  }
+}
+```
