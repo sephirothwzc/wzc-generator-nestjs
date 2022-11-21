@@ -59,7 +59,7 @@ const findForeignKey = (tableItem: IQueryTableOut, keyColumnList: IQueryKeyColum
           txtImport.add(
             `import { ${pascalCase(
               p.referencedTableName
-            )}Entity } from './${p.referencedTableName.replace(/_/g, '-')}.model';`
+            )}Model } from './${p.referencedTableName.replace(/_/g, '-')}.model';`
           );
         importBelongsTo = true;
         let hasManyTemp = '';
@@ -172,7 +172,7 @@ export const send = ({ columnList, tableItem, keyColumnList }: ISend) => {
     importDataType,
   ] = findColumn(columnList, tableItem, keyColumnList);
 
-  const seuqliezeTypeImport = new Set(['Column']);
+  const seuqliezeTypeImport = new Set(['Table', 'Column']);
   importBelongsTo && seuqliezeTypeImport.add('BelongsTo');
   importHasManyTo && seuqliezeTypeImport.add('HasMany');
   importForeignKeyTo && seuqliezeTypeImport.add('ForeignKey');
@@ -188,6 +188,11 @@ export const send = ({ columnList, tableItem, keyColumnList }: ISend) => {
   });
 };
 
+/**
+ *
+ * @param param0
+ * @returns
+ */
 const modelTemplate = ({
   tableName,
   className,
@@ -212,7 +217,9 @@ export class ${className}Model extends BaseModel {
 ${columns}
 }
 
-// eslint-disable-next-line @typescript-eslint/class-name-casing
+/**
+ * ${toUpper(tableName)}
+ */
 export class ${toUpper(tableName)} extends CONST_MODEL {
 ${constTxt}
 }

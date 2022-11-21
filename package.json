@@ -1,6 +1,6 @@
 {
   "name": "wzc-generator-nestjs",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "代码生成器",
   "main": "index.js",
   "scripts": {
@@ -36,7 +36,7 @@
     "bluebird": "^3.7.2",
     "chalk": "^4.1.2",
     "figlet": "^1.5.2",
-    "inquirer": "^8.2.5",
+    "inquirer": "8.2.5",
     "lodash": "^4.17.21",
     "minimist": "^1.2.5",
     "mysql2": "^2.3.0",

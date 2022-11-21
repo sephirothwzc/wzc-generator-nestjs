@@ -153,7 +153,7 @@ const allFun = {
     /**
      * 路径
      */
-    path: `./src/lib/model/customer`,
+    path: `./src/model/customer`,
     /**
      * 前缀
      */
