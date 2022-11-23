@@ -6,6 +6,7 @@ import { QueryTypes } from 'sequelize';
 import { send as modelSend } from './code-template/code-sequelize-model';
 import { send as serviceSend } from './code-template/code-service';
 import { send as resolverSend } from './code-template/code-resolver';
+import { send as objectTypeSend } from './code-template/code-object-type';
 import fs from 'fs';
 import { promisify } from 'util';
 import bluebird from 'bluebird';
@@ -141,6 +142,7 @@ const codeTypeArray = [
   // 'typeGraphql',
   // 'operation',
   'nestjsResolver',
+  'objectTypeSend',
   // 'service',
   // 'gql-react',
   // 'react-antd-list',
@@ -198,6 +200,14 @@ const allFun = {
       return `./src/${fileName}`;
     },
     suffix: 'resolver',
+  },
+  objectTypeSend: {
+    fun: objectTypeSend,
+    path: (tableName: string) => {
+      const fileName = tableName.replace(/_/g, '-');
+      return `./src/${fileName}/entities`;
+    },
+    suffix: 'entity',
   },
   // 'gql-react': {
   //   fun: reactGql,

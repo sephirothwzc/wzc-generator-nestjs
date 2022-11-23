@@ -35,9 +35,41 @@ const findTypeTxt = (p: IQueryColumnOut): string => {
     case 'tinyint':
       return 'boolean';
     case 'json':
-      return 'Record<string, any>';
+      return 'any';
+    case 'point':
+      return 'PointType';
     default:
       return 'string';
+  }
+};
+
+const findSequelizeTypeTxt = (p: IQueryColumnOut): string => {
+  switch (p.dataType) {
+    // case 'bigint':
+    // case 'nvarchar':
+    // case 'varchar':
+    //   return 'DataType.STRING';
+    // case 'int':
+    //   return 'DataType.INTEGER';
+    // case 'timestamp':
+    //   return 'DataType.DATE';
+    // case 'decimal':
+    //   return 'DataType.DECIMAL';
+    // case 'decimal':
+    //   return `DataType.FLOAT`;
+    // case 'double':
+    //   return `DataType.DOUBLE`;
+    // case 'datetime':
+    //   return `Date`;
+    // case 'boolean':
+    // case 'tinyint':
+    //   return 'DataType.BOOLEAN';
+    case 'json':
+      return 'DataType.JSON';
+    case 'point':
+      return "DataType.GEOMETRY('POINT')";
+    default:
+      return '';
   }
 };
 
@@ -48,8 +80,11 @@ const findTypeTxt = (p: IQueryColumnOut): string => {
  * @param {*} sequelizeType
  * @param {*} columnRow
  */
-const findForeignKey = (tableItem: IQueryTableOut, keyColumnList: IQueryKeyColumnOut[]) => {
-  const txtImport = new Set();
+const findForeignKey = (
+  tableItem: IQueryTableOut,
+  keyColumnList: IQueryKeyColumnOut[]
+): [string, Set<string>, boolean, boolean] => {
+  const txtImport = new Set<string>();
   let importBelongsTo = false;
   let importHasManyTo = false;
   const columns = keyColumnList
@@ -103,17 +138,24 @@ const findColumn = (
 ) => {
   let importForeignKeyTo = false;
   let importDataType = false;
+  let importPoint = false;
   const normal = columnList
     .filter((p) => !notColumn.includes(p.columnName))
     .map((p) => {
       const type = findTypeTxt(p);
       const propertyName = camelCase(p.columnName);
+      const sequType = findSequelizeTypeTxt(p);
       const comment = p.columnComment || p.columnName;
 
       const nullable = p.isNullable === 'YES' ? '?' : '';
-      // json 需要增加 type
-      const sequelizeModelType = p.dataType === 'json' ? 'type: DataType.JSON,' : '';
-      importDataType = importDataType || p.dataType === 'json';
+      // 需要增加 type
+      const sequelizeModelType = sequType ? `type: ${sequType},` : '';
+      if (p.dataType === 'join') {
+        importDataType = true;
+      }
+      if (p.dataType === 'point') {
+        importPoint = true;
+      }
 
       const foreignKey = keyColumnList.find(
         (columnRow) =>
@@ -149,6 +191,9 @@ const findColumn = (
     tableItem,
     keyColumnList
   );
+  if (importPoint) {
+    txtImport.add("import { PointType } from 'src/utils/model-type/point-type';");
+  }
 
   return [
     [...normal, columns].join(''),
