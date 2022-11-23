@@ -61,6 +61,12 @@ const findForeignKey = (
               p.referencedTableName
             )} } from 'src/${fileName}/entities/${fileName}.entity';`
           );
+          txtImport.add(
+            `import { ${pascalCase(
+              p.referencedTableName
+            )}Service } from 'src/${fileName}/${fileName}.service';`
+          );
+
           // 非自我关联 增加 inject
           injectService.add(
             `private readonly ${camelCase(p.referencedTableName)}Service: ${pascalCase(
@@ -75,7 +81,7 @@ const findForeignKey = (
     @Parent() parent: ${pascalCase(
       tableItem.tableName
     )}, // Resolved object that implements Character
-    @Info() { info }, // Type of the object that implements Character
+    // @Info() { info }, // Type of the object that implements Character
   ) {
     if (!parent.${camelCase(p.columnName)}) {
       return undefined;
@@ -153,7 +159,7 @@ const modelTemplate = ({
   injectService: string;
 }) => {
   const infoImport = filedResolver ? ', Info' : '';
-  const resolveFieldImport = filedResolver ? ', ResolveField' : '';
+  const resolveFieldImport = filedResolver ? ', Parent, ResolveField' : '';
   return `import { Resolver, Query, Mutation, Args${infoImport}${resolveFieldImport} } from '@nestjs/graphql';
 import { ${className}Service } from './${modelFileName}.service';
 import { ${className} } from './entities/${modelFileName}.entity';
@@ -183,14 +189,14 @@ export class ${className}Resolver {
   @Query(() => [${className}], { name: '${className}All' })
   findAll(@Args('param') param: FindAllInput,
     @CurrentUser() user: LoginEntity,) {
-    return this.${funName}Service.findAll(param);
+    return this.${funName}Service.findAll(param, user);
   }
 
   @UseGuards(GqlAuthGuard)
   @Query(() => ${className}, { name: '${className}' })
   findOne(@Args('id', { type: () => String }) id: string,
     @CurrentUser() user: LoginEntity,) {
-    return this.${funName}Service.findByPk(id);
+    return this.${funName}Service.findByPk(id, user);
   }
 
   @UseGuards(GqlAuthGuard)
@@ -199,14 +205,14 @@ export class ${className}Resolver {
     @Args('update${className}Input') update${className}Input: Update${className}Input,
     @CurrentUser() user: LoginEntity,
   ) {
-    return this.${funName}Service.update(update${className}Input.id, update${className}Input);
+    return this.${funName}Service.update(update${className}Input.id, update${className}Input, user);
   }
 
   @UseGuards(GqlAuthGuard)
   @Mutation(() => ${className})
   remove${className}(@Args('id', { type: () => String }) id: string,
     @CurrentUser() user: LoginEntity,) {
-    return this.${funName}Service.remove(id);
+    return this.${funName}Service.remove(id, user);
   }
   ${filedResolver}
 }
