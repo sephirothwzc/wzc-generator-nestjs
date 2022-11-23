@@ -8,14 +8,23 @@ const modelTemplate = ({
   className: string;
   modelFileName: string;
 }) => {
-  return `import { Provide } from '@midwayjs/decorator';
-import ServiceGenericBase from '../lib/base/service-generic.base';
-import { ${className}Entity } from '../lib/model/${modelFileName}.entity';
+  return `import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { ${className}Model } from 'src/model/customer/${modelFileName}.model';
+import { IBaseService } from 'src/utils/base-service';
+import { SequelizeQuery } from 'src/utils/sequelize-query';
 
-@Provide()
-export class ${className}Service extends ServiceGenericBase<${className}Entity> {
-  get Entity() {
-    return ${className}Entity;
+@Injectable()
+export class ${className}Service extends IBaseService<${className}Model> {
+  constructor(
+    @InjectModel(${className}Model)
+    private model: typeof ${className}Model,
+    sequelizeQuery: SequelizeQuery,
+  ) {
+    super(sequelizeQuery);
+  }
+  get GetModel() {
+    return this.model;
   }
 }
 `;

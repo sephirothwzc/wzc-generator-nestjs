@@ -4,10 +4,10 @@ import { pascalCase } from '../utils/helper';
 
 /**
  * 根据key生成主外建对象 增加 import
- * @param {*} typeString
- * @param {*} enumTypeName
- * @param {*} sequelizeType
- * @param {*} columnRow
+ * @param tableItem
+ * @param keyColumnList
+ * @param inputCol
+ * @returns
  */
 const findForeignKey = (
   tableItem: IQueryTableOut,
@@ -24,29 +24,34 @@ const findForeignKey = (
           txtImport.add(
             `import { ${pascalCase(
               p.referencedTableName
-            )}Entity } from '../lib/model/${fileName}.entity';`
-          );
-          txtImport.add(
-            `import { ${pascalCase(
-              p.referencedTableName
-            )}${inputCol} } from '../graphql/${fileName}/${fileName}.gql';`
+            )} } from 'src/${fileName}/entities/${fileName}.entity';`
           );
         }
         let hasManyTemp = '';
         // 自我关联
         if (p.referencedTableName === tableItem.tableName) {
           hasManyTemp = `
-  @FieldResolver(returns => [${pascalCase(p.referencedTableName)}${inputCol}], { nullable: true })
+  @ResolveField(() => [${pascalCase(p.referencedTableName)}${inputCol}], { nullable: true })
   async  ${camelCase(p.tableName)}${pascalCase(p.columnName)}(
-    @Root() root: ${pascalCase(tableItem.tableName)}Entity,
-    @Ctx() ctx: Context
-  ): Promise<Array<${pascalCase(p.tableName)}Entity>> {
-    if (!root.get('id')) {
+    @Parent() parent: ${pascalCase(
+      tableItem.tableName
+    )}, // Resolved object that implements Character
+    @Info() { info }, // Type of the object that implements Character
+    @Args('param', { type: () => FindAllInput, nullable: true })
+    param: FindAllInput,
+  ) {
+    if (parent.id) {
       return undefined;
     }
-    return this.${camelCase(p.tableName)}Service.findAll({ where: { 
-            ${camelCase(p.columnName)}: root.get('id') 
-          }});
+    // Get character's friends
+    return this.${camelCase(p.tableName)}Service.findAll({
+      ...param,
+      where: {
+        ${camelCase(p.columnName)}: parent.id,
+        ...param?.where,
+      },
+    });
+
   }
   `;
         } else {
@@ -54,68 +59,81 @@ const findForeignKey = (
           txtImport.add(
             `import { ${pascalCase(
               p.referencedTableName
-            )}Service } from '../service/${fileName}.service';`
+            )} } from 'src/${fileName}/entities/${fileName}.entity';`
           );
           // 非自我关联 增加 inject
-          injectService.add(`  @Inject()
-  ${camelCase(p.referencedTableName)}Service: ${pascalCase(p.referencedTableName)}Service;
-`);
+          injectService.add(
+            `private readonly ${camelCase(p.referencedTableName)}Service: ${pascalCase(
+              p.referencedTableName
+            )}Service`
+          );
         }
         // 子表 外键 BelongsTo
         return `  
-  @FieldResolver(returns => ${pascalCase(p.referencedTableName)}${inputCol}, { nullable: true })
+  @ResolveField(() => ${pascalCase(p.referencedTableName)}${inputCol}, { nullable: true })
   async ${camelCase(p.columnName)}Obj(
-    @Root() root: ${pascalCase(tableItem.tableName)}Entity,
-    @Ctx() ctx: Context
-  ): Promise<${pascalCase(p.referencedTableName)}Entity> {
-    if (!root.get('${camelCase(p.columnName)}')) {
+    @Parent() parent: ${pascalCase(
+      tableItem.tableName
+    )}, // Resolved object that implements Character
+    @Info() { info }, // Type of the object that implements Character
+  ) {
+    if (!parent.${camelCase(p.columnName)}) {
       return undefined;
     }
-    return this.${camelCase(p.referencedTableName)}Service.findByPk<${pascalCase(
-          p.referencedTableName
-        )}Entity>(root.get('${camelCase(p.columnName)}'));
+    // Get character's friends
+    return this.${camelCase(p.referencedTableName)}Service.findByPk(parent.${camelCase(
+          p.columnName
+        )});
   }
 ${hasManyTemp}`;
       } else {
         if (p.referencedTableName !== p.tableName) {
           const fileName = p.tableName.replace(/_/g, '-');
+          // import { LittleBeeUser } from 'src/little-bee-user/entities/little-bee-user.entity';
+          // import { LittleBeeUserService } from 'src/little-bee-user/little-bee-user.service';
           txtImport.add(
-            `import { ${pascalCase(p.tableName)}Entity } from '../lib/model/${fileName}.entity';`
+            `import { ${pascalCase(
+              p.tableName
+            )} } from 'src/${fileName}/entities/${fileName}.entity';`
           );
           txtImport.add(
             `import { ${pascalCase(
               p.tableName
-            )}${inputCol} } from '../graphql/${fileName}/${fileName}.gql';`
+            )}Service } from 'src/${fileName}/${fileName}.service';`
           );
-          txtImport.add(
-            `import { ${pascalCase(p.tableName)}Service } from '../service/${fileName}.service';`
-          );
-          injectService.add(`  @Inject()
-  ${camelCase(p.tableName)}Service: ${pascalCase(p.tableName)}Service;
+          injectService.add(`private readonly ${camelCase(p.tableName)}Service: ${pascalCase(
+            p.tableName
+          )}Service
 `);
         }
 
         // 主表 主键 Hasmany
         return `
-  @FieldResolver(returns => [${pascalCase(p.tableName)}${inputCol}], { nullable: true })
+  @ResolveField(() => [${pascalCase(p.tableName)}${inputCol}], { nullable: true })
   async  ${camelCase(p.tableName)}${pascalCase(p.columnName)}(
-    @Root() root: ${pascalCase(tableItem.tableName)}Entity,
-    @Ctx() ctx: Context
-  ): Promise<Array<${pascalCase(p.tableName)}Entity>> {
-    if (!root.get('id')) {
+    @Parent() parent: ${pascalCase(
+      tableItem.tableName
+    )}, // Resolved object that implements Character
+    @Info() { info }, // Type of the object that implements Character
+    @Args('param', { type: () => FindAllInput, nullable: true })
+    param: FindAllInput,
+  ) {
+    if (parent.id) {
       return undefined;
     }
-    return this.${camelCase(p.tableName)}Service.findAll({ where: { 
-            ${camelCase(p.columnName)}: root.get('id') 
-          }});
+    // Get character's friends
+    return this.${camelCase(p.tableName)}Service.findAll({
+      ...param,
+      where: {
+        ${camelCase(p.columnName)}: parent.id,
+        ...param?.where,
+      },
+    });
   }
   `;
       }
     })
     .join(``);
-  if (columns) {
-    txtImport.add(`import { Context } from '@midwayjs/koa';`);
-  }
   return [columns, txtImport, injectService];
 };
 
@@ -134,82 +152,61 @@ const modelTemplate = ({
   importFiled: string;
   injectService: string;
 }) => {
-  return `import { Provide, Inject } from '@midwayjs/decorator';
-import ResolverBase from '../lib/base/resolver.base';
-import Bb from 'bluebird';
-import { Resolver, Query, Arg, Int, Mutation, ID ${
-    filedResolver ? ',FieldResolver, Root, Ctx' : ''
-  } } from 'type-graphql';
-import {
-  ${className},
-  ${className}SaveIn,
-  ${className}List,
-} from '../graphql/${modelFileName}/${modelFileName}.gql';
-import QueryListParam from '../graphql/utils/query-list-param.gql';
-import { ${className}Service } from '../service/${modelFileName}.service';
-import { ${className}Entity } from '../lib/model/${modelFileName}.entity';
+  const infoImport = filedResolver ? ', Info' : '';
+  const resolveFieldImport = filedResolver ? ', ResolveField' : '';
+  return `import { Resolver, Query, Mutation, Args${infoImport}${resolveFieldImport} } from '@nestjs/graphql';
+import { ${className}Service } from './${modelFileName}.service';
+import { ${className} } from './entities/${modelFileName}.entity';
+import { Create${className}Input } from './dto/create-${modelFileName}.input';
+import { Update${className}Input } from './dto/update-${modelFileName}.input';
+import { FindAllInput } from 'src/utils/common.input';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from 'src/auth/gql-auth.guard';
+import { CurrentUser } from 'src/auth/current-user';
+import { LoginEntity } from 'src/little-bee-user/entities/login.entity';
 ${importFiled}
 
-@Provide()
 @Resolver(() => ${className})
-export default class ${className}Resolver extends ResolverBase {
-  @Inject()
-  ${funName}Service: ${className}Service;
-  ${injectService}
+export class ${className}Resolver {
+  constructor(private readonly ${funName}Service: ${className}Service,${injectService}) {}
 
-  @Query(type => Int)
-  async ${funName}Count(
-    @Arg('param', () => QueryListParam, { nullable: true })
-    param: QueryListParam
-  ): Promise<number> {
-    return this.${funName}Service.findCount(param);
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => ${className})
+  create${className}(
+    @Args('create${className}Input') create${className}Input: Create${className}Input,
+    @CurrentUser() user: LoginEntity,
+  ) {
+    return this.${funName}Service.create(create${className}Input,user);
   }
 
-  @Query(returns => ${className}List, { nullable: true })
-  async ${funName}List(
-    @Arg('param', type => QueryListParam, { nullable: true })
-    param: QueryListParam
-  ): Promise<{
-    list: ${className}Entity[];
-    count: number;
-  }> {
-    return Bb.props({
-      list: this.${funName}Service.findAll(param),
-      count: this.${funName}Service.findCount(param),
-    });
+  @UseGuards(GqlAuthGuard)
+  @Query(() => [${className}], { name: '${className}All' })
+  findAll(@Args('param') param: FindAllInput,
+    @CurrentUser() user: LoginEntity,) {
+    return this.${funName}Service.findAll(param);
   }
 
-  @Query(returns => ${className}, { nullable: true })
-  async ${funName}(@Arg('id', type => ID) id: string): Promise<${className}Entity> {
+  @UseGuards(GqlAuthGuard)
+  @Query(() => ${className}, { name: '${className}' })
+  findOne(@Args('id', { type: () => String }) id: string,
+    @CurrentUser() user: LoginEntity,) {
     return this.${funName}Service.findByPk(id);
   }
-  @Query(returns => [${className}])
-  async ${funName}All(
-    @Arg('param', type => QueryListParam, { nullable: true })
-    param: QueryListParam
-  ): Promise<Array<${className}>> {
-    return this.${funName}Service.findAll(param) as any;
+
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => ${className})
+  update${className}(
+    @Args('update${className}Input') update${className}Input: Update${className}Input,
+    @CurrentUser() user: LoginEntity,
+  ) {
+    return this.${funName}Service.update(update${className}Input.id, update${className}Input);
   }
 
-  @Mutation(returns => ${className}, {
-    name: '${funName}',
-  })
-  async ${funName}Save(
-    @Arg('param', type => ${className}SaveIn) param: ${className}Entity
-  ): Promise<${className}Entity> {
-    return this.${funName}Service.save(param);
-  }
-
-  @Mutation(returns => [${className}], { nullable: true })
-  async ${funName}Bulk(
-    @Arg('param', type => [${className}SaveIn]) param: [${className}Entity]
-  ): Promise<${className}Entity[]> {
-    return this.${funName}Service.bulkSave(param);
-  }
-
-  @Mutation(returns => String, { nullable: true })
-  async ${funName}Destroy(@Arg('id', type => ID) id: string): Promise<string> {
-    return this.${funName}Service.destroyById(id);
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => ${className})
+  remove${className}(@Args('id', { type: () => String }) id: string,
+    @CurrentUser() user: LoginEntity,) {
+    return this.${funName}Service.remove(id);
   }
   ${filedResolver}
 }
@@ -224,6 +221,6 @@ export const send = ({ tableItem, keyColumnList }: ISend) => {
     modelFileName: tableItem.tableName.replace(/_/g, '-'),
     filedResolver,
     importFiled: Array.from(importFiled).join(''),
-    injectService: Array.from(injectService).join(''),
+    injectService: Array.from(injectService).join(','),
   });
 };

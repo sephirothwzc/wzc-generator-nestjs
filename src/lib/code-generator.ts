@@ -4,6 +4,8 @@ import shell from 'shelljs';
 import { Sequelize } from 'sequelize-typescript';
 import { QueryTypes } from 'sequelize';
 import { send as modelSend } from './code-template/code-sequelize-model';
+import { send as serviceSend } from './code-template/code-service';
+import { send as resolverSend } from './code-template/code-resolver';
 import fs from 'fs';
 import { promisify } from 'util';
 import bluebird from 'bluebird';
@@ -135,9 +137,10 @@ const getConn = (config: ISequelizeConfig): Sequelize => {
  */
 const codeTypeArray = [
   'sequelizeModel',
+  'nestjsService',
   // 'typeGraphql',
   // 'operation',
-  // 'resolver',
+  'nestjsResolver',
   // 'service',
   // 'gql-react',
   // 'react-antd-list',
@@ -171,11 +174,14 @@ const allFun = {
   //   },
   //   suffix: 'gql',
   // },
-  // service: {
-  //   fun: serviceSend,
-  //   path: `./src/service`,
-  //   suffix: 'service',
-  // },
+  nestjsService: {
+    fun: serviceSend,
+    path: (tableName: string) => {
+      const fileName = tableName.replace(/_/g, '-');
+      return `./src/${fileName}`;
+    },
+    suffix: 'service',
+  },
   // operation: {
   //   fun: operationSend,
   //   path: (tableName: string) => {
@@ -185,11 +191,14 @@ const allFun = {
   //   extension: 'gql',
   //   fileName: 'operation',
   // },
-  // resolver: {
-  //   fun: resolverSend,
-  //   path: `./src/resolver`,
-  //   suffix: 'resolver',
-  // },
+  nestjsResolver: {
+    fun: resolverSend,
+    path: (tableName: string) => {
+      const fileName = tableName.replace(/_/g, '-');
+      return `./src/${fileName}`;
+    },
+    suffix: 'resolver',
+  },
   // 'gql-react': {
   //   fun: reactGql,
   //   path: (tableName: string) => {
