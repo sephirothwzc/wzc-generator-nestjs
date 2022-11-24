@@ -150,7 +150,7 @@ const findColumn = (
       const nullable = p.isNullable === 'YES' ? '?' : '';
       // 需要增加 type
       const sequelizeModelType = sequType ? `type: ${sequType},` : '';
-      if (p.dataType === 'join') {
+      if (['join', 'point'].includes(p.dataType)) {
         importDataType = true;
       }
       if (p.dataType === 'point') {
