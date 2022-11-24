@@ -7,7 +7,7 @@ import { send as modelSend } from './code-template/code-sequelize-model';
 import { send as serviceSend } from './code-template/code-service';
 import { send as resolverSend } from './code-template/code-resolver';
 import { send as objectTypeSend } from './code-template/code-object-type';
-import { send as createInputTypeSend } from './code-template/code-update-input-type';
+import { send as createInputTypeSend } from './code-template/code-create-input-type';
 import { send as updateInputTypeSend } from './code-template/code-update-input-type';
 import fs from 'fs';
 import { promisify } from 'util';
