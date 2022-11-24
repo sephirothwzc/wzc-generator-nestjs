@@ -3,7 +3,7 @@ import { camelCase, toString } from 'lodash';
 import { pascalCase } from '../utils/helper';
 
 const notColumn = [
-  'id',
+  // 'id',
   'created_at',
   'updated_at',
   'deleted_at',
@@ -37,7 +37,7 @@ const findTypeTxt = (p: IQueryColumnOut): string => {
     case 'json':
       return 'any';
     case 'point':
-      return 'GraphQLGeometryPoint';
+      return 'PointInput';
     default:
       return 'string';
   }
@@ -138,7 +138,7 @@ const modelTemplate = ({
 ${txtImport}
 
 @InputType()
-export class ${className} {
+export class Update${className}Input {
 ${columns}
 }
 `;

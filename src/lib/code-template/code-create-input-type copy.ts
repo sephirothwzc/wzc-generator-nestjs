@@ -138,7 +138,7 @@ const modelTemplate = ({
 ${txtImport}
 
 @InputType()
-export class ${className} {
+export class Create${className}Input {
 ${columns}
 }
 `;
