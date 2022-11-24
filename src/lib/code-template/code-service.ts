@@ -12,16 +12,14 @@ const modelTemplate = ({
 import { InjectModel } from '@nestjs/sequelize';
 import { ${className}Model } from 'src/model/customer/${modelFileName}.model';
 import { IBaseService } from 'src/utils/base-service';
-import { SequelizeQuery } from 'src/utils/sequelize-query';
 
 @Injectable()
 export class ${className}Service extends IBaseService<${className}Model> {
   constructor(
     @InjectModel(${className}Model)
     private model: typeof ${className}Model,
-    sequelizeQuery: SequelizeQuery,
   ) {
-    super(sequelizeQuery);
+    super();
   }
   get GetModel() {
     return this.model;
