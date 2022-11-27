@@ -49,8 +49,8 @@ const findSequelizeTypeTxt = (p: IQueryColumnOut): string => {
     // case 'nvarchar':
     // case 'varchar':
     //   return 'DataType.STRING';
-    // case 'int':
-    //   return 'DataType.INTEGER';
+    case 'int':
+      return 'DataType.INTEGER';
     // case 'timestamp':
     //   return 'DataType.DATE';
     // case 'decimal':
@@ -150,7 +150,7 @@ const findColumn = (
       const nullable = p.isNullable === 'YES' ? '?' : '';
       // 需要增加 type
       const sequelizeModelType = sequType ? `type: ${sequType},` : '';
-      if (['join', 'point'].includes(p.dataType)) {
+      if (sequType) {
         importDataType = true;
       }
       if (p.dataType === 'point') {
