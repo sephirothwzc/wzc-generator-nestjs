@@ -169,7 +169,7 @@ import { FindAllInput } from 'src/utils/common.input';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/gql-auth.guard';
 import { CurrentUser } from 'src/auth/current-user';
-import { LoginEntity } from 'src/little-bee-user/entities/login.entity';
+import { JwtAuthEntity } from 'src/auth/jwt-auth-entity';
 ${importFiled}
 
 @Resolver(() => ${className})
@@ -180,7 +180,7 @@ export class ${className}Resolver {
   @Mutation(() => ${className})
   create${className}(
     @Args('create${className}Input') create${className}Input: Create${className}Input,
-    @CurrentUser() user: LoginEntity,
+    @CurrentUser() user: JwtAuthEntity,
   ) {
     return this.${funName}Service.create(create${className}Input,user);
   }
@@ -188,14 +188,14 @@ export class ${className}Resolver {
   @UseGuards(GqlAuthGuard)
   @Query(() => [${className}], { name: '${className}All' })
   findAll(@Args('param') param: FindAllInput,
-    @CurrentUser() user: LoginEntity,) {
+    @CurrentUser() user: JwtAuthEntity,) {
     return this.${funName}Service.findAll(param, user);
   }
 
   @UseGuards(GqlAuthGuard)
   @Query(() => ${className}, { name: '${className}' })
   findOne(@Args('id', { type: () => String }) id: string,
-    @CurrentUser() user: LoginEntity,) {
+    @CurrentUser() user: JwtAuthEntity,) {
     return this.${funName}Service.findByPk(id, user);
   }
 
@@ -203,7 +203,7 @@ export class ${className}Resolver {
   @Mutation(() => ${className})
   update${className}(
     @Args('update${className}Input') update${className}Input: Update${className}Input,
-    @CurrentUser() user: LoginEntity,
+    @CurrentUser() user: JwtAuthEntity,
   ) {
     return this.${funName}Service.update(update${className}Input.id, update${className}Input, user);
   }
@@ -211,7 +211,7 @@ export class ${className}Resolver {
   @UseGuards(GqlAuthGuard)
   @Mutation(() => ${className})
   remove${className}(@Args('id', { type: () => String }) id: string,
-    @CurrentUser() user: LoginEntity,) {
+    @CurrentUser() user: JwtAuthEntity,) {
     return this.${funName}Service.remove(id, user);
   }
   ${filedResolver}

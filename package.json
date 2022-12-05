@@ -1,6 +1,6 @@
 {
   "name": "wzc-generator-nestjs",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "代码生成器",
   "main": "index.js",
   "scripts": {
