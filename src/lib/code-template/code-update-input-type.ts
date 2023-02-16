@@ -85,7 +85,12 @@ const findColumn = (columnList: IQueryColumnOut[]): [string, Set<string>, Set<st
 
       const nullable = p.isNullable === 'YES' ? '?' : '';
       // #region gqltype
-      if (gqlType !== 'String' && gqlType !== 'PointInput' && gqlType !== 'GraphQLJSONObject') {
+      if (
+        gqlType !== 'String' &&
+        gqlType !== 'Boolean' &&
+        gqlType !== 'PointInput' &&
+        gqlType !== 'GraphQLJSONObject'
+      ) {
         importGqlType.add(gqlType);
       } else if (gqlType === 'PointInput') {
         importOtherType.add("import { PointInput } from 'src/utils/input-type/point-input';");
