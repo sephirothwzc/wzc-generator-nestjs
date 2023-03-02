@@ -193,6 +193,15 @@ export class ${className}Resolver {
   }
 
   @UseGuards(GqlAuthGuard)
+  @Query(() => Number, { name: '${className}Count' })
+  findCount(
+    @Args('param') param: FindAllInput,
+    @CurrentUser() user: JwtAuthEntity,
+  ) {
+    return this.${funName}Service.findCount(param, user);
+  }
+
+  @UseGuards(GqlAuthGuard)
   @Query(() => ${className}, { name: '${className}' })
   findOne(@Args('id', { type: () => String }) id: string,
     @CurrentUser() user: JwtAuthEntity,) {
