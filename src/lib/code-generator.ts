@@ -9,6 +9,7 @@ import { send as resolverSend } from './code-template/code-resolver';
 import { send as objectTypeSend } from './code-template/code-object-type';
 import { send as createInputTypeSend } from './code-template/code-create-input-type';
 import { send as updateInputTypeSend } from './code-template/code-update-input-type';
+import { send as saveInputTypeSend } from './code-template/code-save-input-type';
 import fs from 'fs';
 import { promisify } from 'util';
 import bluebird from 'bluebird';
@@ -147,6 +148,7 @@ const codeTypeArray = [
   'objectTypeSend',
   'createInputTypeSend',
   'updateInputTypeSend',
+  'saveInputTypeSend',
   // 'service',
   // 'gql-react',
   // 'react-antd-list',
@@ -235,6 +237,18 @@ const allFun = {
     fileName: (tableName: string) => {
       const fileName = tableName.replace(/_/g, '-');
       return `update-${fileName}`;
+    },
+  },
+  saveInputTypeSend: {
+    fun: saveInputTypeSend,
+    path: (tableName: string) => {
+      const fileName = tableName.replace(/_/g, '-');
+      return `./src/${fileName}/dto`;
+    },
+    suffix: 'input',
+    fileName: (tableName: string) => {
+      const fileName = tableName.replace(/_/g, '-');
+      return `save-${fileName}`;
     },
   },
   // 'gql-react': {
