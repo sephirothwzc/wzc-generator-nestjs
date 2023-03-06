@@ -143,7 +143,7 @@ const modelTemplate = ({
 ${txtImport}
 
 @InputType()
-export class Update${className}Input {
+export class Save${className}Input {
 ${columns}
 }
 `;
