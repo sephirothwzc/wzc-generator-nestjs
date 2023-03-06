@@ -165,6 +165,7 @@ import { ${className}Service } from './${modelFileName}.service';
 import { ${className} } from './entities/${modelFileName}.entity';
 import { Create${className}Input } from './dto/create-${modelFileName}.input';
 import { Update${className}Input } from './dto/update-${modelFileName}.input';
+import { Save${className}Input } from './dto/save-${modelFileName}.input';
 import { FindAllInput } from 'src/utils/common.input';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/gql-auth.guard';
@@ -175,6 +176,15 @@ ${importFiled}
 @Resolver(() => ${className})
 export class ${className}Resolver {
   constructor(private readonly ${funName}Service: ${className}Service,${injectService}) {}
+
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => ${className})
+  save${className}(
+    @Args('save${className}Input') save${className}Input: Save${className}Input,
+    @CurrentUser() user: JwtAuthEntity,
+  ) {
+    return this.${funName}Service.save(save${className}Input, user);
+  }
 
   @UseGuards(GqlAuthGuard)
   @Mutation(() => ${className})
