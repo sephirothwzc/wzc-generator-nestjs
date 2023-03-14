@@ -228,7 +228,7 @@ export class ${className}Resolver {
   }
 
   @UseGuards(GqlAuthGuard)
-  @Mutation(() => ${className})
+  @Mutation(() => String)
   remove${className}(@Args('id', { type: () => String }) id: string,
     @CurrentUser() user: JwtAuthEntity,) {
     return this.${funName}Service.remove(id, user);
