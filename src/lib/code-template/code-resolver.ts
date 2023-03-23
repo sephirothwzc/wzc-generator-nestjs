@@ -171,6 +171,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/gql-auth.guard';
 import { CurrentUser } from 'src/auth/current-user';
 import { JwtAuthEntity } from 'src/auth/jwt-auth-entity';
+import { SaveIncludeInput } from 'src/user/dto/save-include.input';
 ${importFiled}
 
 @Resolver(() => ${className})
@@ -181,11 +182,11 @@ export class ${className}Resolver {
   @Mutation(() => ${className})
   save${className}(
     @Args('save${className}Input') save${className}Input: Save${className}Input,
-    @Args('createInclude', { type: () => [String], nullable: true })
-    createInclude: Array<string>,
+    @Args('saveIncludeInput', { type: () => [SaveIncludeInput], nullable: true })
+    saveIncludeInput: Array<SaveIncludeInput>,
     @CurrentUser() user: JwtAuthEntity,
   ) {
-    return this.${funName}Service.save(save${className}Input, user, createInclude);
+    return this.${funName}Service.save(save${className}Input, user, saveIncludeInput);
   }
 
   @UseGuards(GqlAuthGuard)
