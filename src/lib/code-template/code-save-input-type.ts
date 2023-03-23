@@ -88,9 +88,10 @@ const findForeignKey = (
     .map((p) => {
       p.referencedTableName !== p.tableName &&
         txtImport.add(
-          `import { Save${pascalCase(
-            p.tableName
-          )}Input } from 'src/user-company-role/dto/save-${p.tableName.replace(/_/g, '-')}.input';`
+          `import { Save${pascalCase(p.tableName)}Input } from 'src/${p.tableName.replace(
+            /_/g,
+            '-'
+          )}/dto/save-${p.tableName.replace(/_/g, '-')}.input';`
         );
       importHasManyTo = true;
       // 主表 主键 Hasmany
