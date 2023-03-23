@@ -181,7 +181,7 @@ export class ${className}Resolver {
   @Mutation(() => ${className})
   save${className}(
     @Args('save${className}Input') save${className}Input: Save${className}Input,
-    @Args('createInclude', { type: () => [String] })
+    @Args('createInclude', { type: () => [String], nullable: true })
     createInclude: Array<string>,
     @CurrentUser() user: JwtAuthEntity,
   ) {
