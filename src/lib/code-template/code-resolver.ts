@@ -181,9 +181,11 @@ export class ${className}Resolver {
   @Mutation(() => ${className})
   save${className}(
     @Args('save${className}Input') save${className}Input: Save${className}Input,
+    @Args('createInclude', { type: () => [String] })
+    createInclude: Array<string>,
     @CurrentUser() user: JwtAuthEntity,
   ) {
-    return this.${funName}Service.save(save${className}Input, user);
+    return this.${funName}Service.save(save${className}Input, user, createInclude);
   }
 
   @UseGuards(GqlAuthGuard)

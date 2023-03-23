@@ -1,4 +1,4 @@
-import { IQueryColumnOut, ISend } from '../code-generator';
+import { IQueryColumnOut, IQueryKeyColumnOut, IQueryTableOut, ISend } from '../code-generator';
 import { camelCase, toString } from 'lodash';
 import { pascalCase } from '../utils/helper';
 
@@ -70,7 +70,48 @@ const findGqlTypeTxt = (p: IQueryColumnOut): string => {
   }
 };
 
-const findColumn = (columnList: IQueryColumnOut[]): [string, Set<string>, Set<string>] => {
+/**
+ * 根据key生成主外建对象 增加 import
+ * @param {*} typeString
+ * @param {*} enumTypeName
+ * @param {*} sequelizeType
+ * @param {*} columnRow
+ */
+const findForeignKey = (
+  tableItem: IQueryTableOut,
+  keyColumnList: IQueryKeyColumnOut[]
+): [string, Set<string>, boolean] => {
+  const txtImport = new Set<string>();
+  let importHasManyTo = false;
+  const columns = keyColumnList
+    .filter((p) => p.tableName !== tableItem.tableName)
+    .map((p) => {
+      p.referencedTableName !== p.tableName &&
+        txtImport.add(
+          `import { Save${pascalCase(
+            p.tableName
+          )}Input } from 'src/user-company-role/dto/save-${p.tableName.replace(/_/g, '-')}.input';`
+        );
+      importHasManyTo = true;
+      // 主表 主键 Hasmany
+      return `  /**
+   * 
+   */
+  @Field(() => [Save${pascalCase(p.tableName)}Input], {
+    nullable: true,
+  })
+  ${camelCase(p.tableName)}${pascalCase(p.columnName)}?: Array<Save${pascalCase(p.tableName)}Input>;
+`;
+    })
+    .join(``);
+  return [columns, txtImport, importHasManyTo];
+};
+
+const findColumn = (
+  columnList: IQueryColumnOut[],
+  tableItem: IQueryTableOut,
+  keyColumnList: IQueryKeyColumnOut[]
+): [string, Set<string>, Set<string>] => {
   // 类型
   const importGqlType = new Set<string>();
   // 其他类型
@@ -107,11 +148,18 @@ const findColumn = (columnList: IQueryColumnOut[]): [string, Set<string>, Set<st
 `;
     });
 
-  return [normal.join(''), importGqlType, importOtherType];
+  const [columns, txtImport] = findForeignKey(tableItem, keyColumnList);
+
+  Array.from(txtImport).forEach((p) => importOtherType.add(p));
+  return [[...normal, columns].join(''), importGqlType, importOtherType];
 };
 
-export const send = ({ columnList, tableItem }: ISend) => {
-  const [columns, importGqlType, importOtherType] = findColumn(columnList);
+export const send = ({ columnList, tableItem, keyColumnList }: ISend) => {
+  const [columns, importGqlType, importOtherType] = findColumn(
+    columnList,
+    tableItem,
+    keyColumnList
+  );
 
   return modelTemplate({
     tableName: tableItem.tableName,
