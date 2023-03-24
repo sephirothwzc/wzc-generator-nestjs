@@ -124,7 +124,7 @@ ${hasManyTemp}`;
     @Args('param', { type: () => FindAllInput, nullable: true })
     param: FindAllInput,
   ) {
-    if (parent.id) {
+    if (!parent.id) {
       return undefined;
     }
     // Get character's friends
