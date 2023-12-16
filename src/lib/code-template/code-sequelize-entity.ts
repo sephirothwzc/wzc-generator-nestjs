@@ -115,13 +115,13 @@ const findForeignKey = (
         }
         // #region push attributes
         attributesColumns.push(`
-        ${camelCase(p.columnName)}Obj?: ${pascalCase(p.referencedTableName)}
+        ${camelCase(p.columnName)}Obj: ${pascalCase(p.referencedTableName)}
         `);
         // #endregion push attributes
         // 子表 外键 BelongsTo
         return `
   @BelongsTo(() => ${pascalCase(p.referencedTableName)}, '${p.columnName}')
-  ${camelCase(p.columnName)}Obj: ${pascalCase(p.referencedTableName)};
+  ${camelCase(p.columnName)}Obj: MaybeNull<${pascalCase(p.referencedTableName)}>;
 ${hasManyTemp}`;
       } else {
         importHasManyTo = true;
@@ -133,7 +133,9 @@ ${hasManyTemp}`;
         // 主表 主键 Hasmany
         return `
   @HasMany(() => ${pascalCase(p.tableName)}, '${p.columnName}')
-  ${camelCase(p.tableName)}${pascalCase(p.columnName)}: Array<${pascalCase(p.tableName)}>;
+  public readonly ${camelCase(p.tableName)}${pascalCase(p.columnName)}: Array<${pascalCase(
+          p.tableName
+        )}>;
 `;
       }
     })
@@ -157,7 +159,10 @@ const findColumn = (
       const sequType = findSequelizeTypeTxt(p);
       const comment = p.columnComment || p.columnName;
 
-      const nullable = p.isNullable === 'YES' ? '?' : '';
+      let nullable = '!';
+      if (p.isNullable === 'YES') {
+        nullable = '?';
+      }
       // 需要增加 type
       const sequelizeModelType = sequType ? `type: ${sequType},` : '';
       if (sequType) {
@@ -184,7 +189,7 @@ const findColumn = (
    @Column({
     comment: '${comment}',${sequelizeModelType}
   })
-  ${propertyName}${nullable}: ${type};
+  public readonly ${propertyName}${nullable}: ${type};
 `;
     });
   const constTxt = columnList
@@ -194,7 +199,7 @@ const findColumn = (
   /**
    * ${p.columnComment}
    */
-  public static readonly ${toUpper(p.columnName)} = '${camelCase(p.columnName)}';
+  public readonly ${toUpper(p.columnName)} = '${camelCase(p.columnName)}';
 `;
     });
   const [columns, txtImport, importBelongsTo, importHasManyTo] = findForeignKey(
@@ -210,13 +215,17 @@ const findColumn = (
     columnList
       .filter((p) => !notColumn.includes(p.columnName))
       .map((p) => {
+        let nullable = '!';
+        if (p.isNullable === 'YES') {
+          nullable = '?';
+        }
         const type = findTypeTxt(p);
         const propertyName = camelCase(p.columnName);
         return `
   /**
    * ${p.columnComment}
    */
-  ${propertyName}: ${type};
+  ${propertyName}${nullable}: ${type};
 `;
       })
   );
@@ -243,7 +252,7 @@ export const send = ({ columnList, tableItem, keyColumnList }: ISend) => {
     importDataType,
   ] = findColumn(columnList, tableItem, keyColumnList);
 
-  const seuqliezeTypeImport = new Set(['Table', 'Column']);
+  const seuqliezeTypeImport = new Set(['Table', 'Column', 'Model']);
   importBelongsTo && seuqliezeTypeImport.add('BelongsTo');
   importHasManyTo && seuqliezeTypeImport.add('HasMany');
   importForeignKeyTo && seuqliezeTypeImport.add('ForeignKey');
@@ -281,8 +290,11 @@ const modelTemplate = ({
 }): string => {
   console.log(txtImport);
   const txt = `import { ${seuqliezeTypeImport} } from 'sequelize-typescript';
-@Table({ modelName: '${tableName}' })
 
+/**
+ *
+ */
+@Table({ modelName: '${tableName}' })
 export class ${className} extends Model<Attributes> implements Attributes {
 ${columns}
 }
