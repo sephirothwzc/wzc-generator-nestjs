@@ -3,7 +3,7 @@ import { get, isString } from 'lodash';
 import shell from 'shelljs';
 import { Sequelize } from 'sequelize-typescript';
 import { QueryTypes } from 'sequelize';
-import { send as modelSend } from './code-template/code-sequelize-model';
+import { send as modelSend } from './code-template/code-sequelize-entity';
 import { send as serviceSend } from './code-template/code-service';
 import { send as resolverSend } from './code-template/code-resolver';
 import { send as objectTypeSend } from './code-template/code-object-type';
@@ -164,11 +164,11 @@ const allFun = {
     /**
      * 路径
      */
-    path: `./src/model/customer`,
+    path: `dist/entity`,
     /**
      * 前缀
      */
-    suffix: `model`,
+    suffix: `entity`,
     /**
      * 扩展名 可以为空默认 ts
      */
@@ -492,7 +492,7 @@ const queryKeyColumn = async (
   config: ISequelizeConfig,
   name: string
 ): Promise<Array<IQueryKeyColumnOut>> => {
-  const sql = `SELECT C.TABLE_SCHEMA as tableSchema,
+  const sql = `SELECT DISTINCT C.TABLE_SCHEMA as tableSchema,
            C.REFERENCED_TABLE_NAME as referencedTableName,
            C.REFERENCED_COLUMN_NAME as referencedColumnName,
            C.TABLE_NAME as tableName,
@@ -511,7 +511,8 @@ const queryKeyColumn = async (
       WHERE C.REFERENCED_TABLE_NAME IS NOT NULL 
 				AND (C.REFERENCED_TABLE_NAME = :tableName or C.TABLE_NAME = :tableName)
         AND C.TABLE_SCHEMA = :database
-        group by C.CONSTRAINT_NAME order by C.CONSTRAINT_NAME`;
+        -- group by C.CONSTRAINT_NAME 
+        order by C.CONSTRAINT_NAME`;
   const sequelize = getConn(config);
   const result = await sequelize.query<IQueryKeyColumnOut>(sql, {
     replacements: {
