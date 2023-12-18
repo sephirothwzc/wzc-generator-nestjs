@@ -290,16 +290,24 @@ const modelTemplate = ({
 }): string => {
   console.log(txtImport);
   const txt = `import { ${seuqliezeTypeImport} } from 'sequelize-typescript';
+import { StaticSnowFlake } from '@euclase/common/lib/sequelize/utilities/flake-id'
 
 /**
  *
  */
-@Table({ modelName: '${tableName}' })
+@Table({ tableName: '${tableName}' })
 export class ${className} extends Model<Attributes> implements Attributes {
+  @Column({
+    primaryKey: true,
+    autoIncrement: false,
+    defaultValue: () => StaticSnowFlake.next(),
+  })
+  public override readonly id?: string
 ${columns}
 }
 
 interface Attributes {
+  id?: string
 ${attributesColumns.join(``)}
 }
 
