@@ -311,7 +311,7 @@ interface Attributes {
 ${attributesColumns.join(``)}
 }
 
-export type ${toUpper(tableName)}AttributesType = Attributes
+export type ${className}AttributesType = Attributes
 
 /**
  * ${toUpper(tableName)}
