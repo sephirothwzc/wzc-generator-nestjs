@@ -10,6 +10,7 @@ import { send as objectTypeSend } from './code-template/code-object-type';
 import { send as createInputTypeSend } from './code-template/code-create-input-type';
 import { send as updateInputTypeSend } from './code-template/code-update-input-type';
 import { send as saveInputTypeSend } from './code-template/code-save-input-type';
+import { send as typeormEntitySend } from './code-template/code-typeorm-entity';
 import fs from 'fs';
 import { promisify } from 'util';
 import bluebird from 'bluebird';
@@ -149,6 +150,7 @@ const codeTypeArray = [
   'createInputTypeSend',
   'updateInputTypeSend',
   'saveInputTypeSend',
+  'typeormEntitySend',
   // 'service',
   // 'gql-react',
   // 'react-antd-list',
@@ -250,6 +252,21 @@ const allFun = {
       const fileName = tableName.replace(/_/g, '-');
       return `save-${fileName}`;
     },
+  },
+  typeormEntitySend: {
+    fun: typeormEntitySend,
+    /**
+     * 路径
+     */
+    path: `./src/entity/`,
+    /**
+     * 前缀
+     */
+    suffix: `entity`,
+    /**
+     * 扩展名 可以为空默认 ts
+     */
+    extension: 'ts',
   },
   // 'gql-react': {
   //   fun: reactGql,

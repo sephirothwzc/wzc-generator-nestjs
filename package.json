@@ -43,7 +43,8 @@
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.6.5",
     "sequelize-typescript": "^2.1.1",
-    "shelljs": "^0.8.4"
+    "shelljs": "^0.8.4",
+    "tweetnacl": "^1.0.3"
   },
   "husky": {
     "hooks": {
